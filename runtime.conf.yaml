@@ -1,0 +1,58 @@
+%YAML 1.2
+# Configuration loaded from: /home/sbalduin/.config/palaestrai/runtime-conf.yaml
+---
+data_path: ./_outputs
+executor_bus_port: 4242
+logger_port: 4243
+logging:
+  filters:
+    debug_filter: {(): palaestrai.core.runtime_config.DebugLogFilter}
+  formatters:
+    debug: {format: '%(asctime)s %(name)s[%(process)d]: %(levelname)s - %(message)s
+        (%(module)s.%(funcName)s in %(filename)s:%(lineno)d)'}
+    simple: {format: '%(asctime)s %(name)s[%(process)d]: %(levelname)s - %(message)s'}
+  handlers:
+    console: {class: logging.StreamHandler, formatter: simple, level: CRITICAL, stream: 'ext://sys.stdout'}
+    console_debug:
+      class: logging.StreamHandler
+      filters: [debug_filter]
+      formatter: debug
+      level: DEBUG
+      stream: ext://sys.stdout
+    logfile: {class: logging.FileHandler, filename: palaestrai.log, formatter: simple,
+      level: CRITICAL, mode: a}
+  loggers:
+    midas: {level: ERROR}
+    midas.modules.powergrid: {level: ERROR}
+    palaestrai.agent: {level: ERROR}
+    palaestrai.agent.agent_conductor: {level: ERROR}
+    palaestrai.agent.brain: {level: ERROR}
+    palaestrai.agent.muscle: {level: DEBUG}
+    palaestrai.environment: {level: DEBUG}
+    palaestrai.experiment: {level: ERROR}
+    palaestrai.simulation: {level: ERROR}
+    palaestrai.store: {level: ERROR}
+    palaestrai.types: {level: ERROR}
+    palaestrai.util: {level: ERROR}
+    palaestrai.core: {level: ERROR}
+    palaestrai.visualization: {level: ERROR}
+    palaestrai_environments: {level: ERROR}
+    palaestrai_gym: {level: ERROR}
+    palaestrai_mosaik: {level: ERROR}
+    palaestrai_random: {level: ERROR}
+    palaestrai_tictactoe: {level: ERROR}
+    pysimmods.mosaik: {level: ERROR}
+    sqlalchemy.engine: {level: ERROR}
+    environments: {level: ERROR}
+  root:
+    handlers: [console] #,console_debug, logfile]
+    level: CRITICAL
+  version: 1
+major_domo_client_retries: 3
+major_domo_client_timeout: 1800000
+profile: false
+public_bind: false
+store_uri: ~
+#store_uri: postgresql://palaestrai:TreasureKeeperOfTheOrderOfARL@mnemosyne.cli.lcl.offis.de/carl
+#store_uri: elasticsearch+http://compose_elasticsearch:9200
+#time_series_store_uri: influx+Admin:testadmin@http://compose_influxdb:8086

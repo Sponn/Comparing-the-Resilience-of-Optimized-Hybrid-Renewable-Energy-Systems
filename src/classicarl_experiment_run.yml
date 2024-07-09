@@ -1,0 +1,394 @@
+######################################################################
+# Example experiment configuration file:                             #
+# This file is used in the unit test tests.unit.arl.doe.test_el.py   #
+# Do not change it! But can copy it and modify it to your needs      #
+# Below the configuration are some additional information            #
+######################################################################
+uid: "Diss-LHa-resilience-evaluation-with-attacker"
+seed: 123
+version: 3.5.0
+schedule:
+  - training:
+      environments:
+        - environment:
+            name: palaestrai_mosaik:MosaikEnvironment # python import stuff, everything behind : = class
+            uid: midas_powergrid
+            params:
+              module: midas.tools.palaestrai:Descriptor # always the same if you use MIDAS
+              description_func: describe # always the same if you use MIDAS
+              instance_func: get_world # always the same if you use MIDAS
+              arl_sync_freq: 60 # &step_size 1 means to set variable step_size=1
+              end: 24*60*60*15  # One simulated minute*5
+              silence_missing_input_connections_warning: True
+
+              params:  # Parameters that are passed to description_func and
+                       # instance_func, Part that is being sent to MIDAS directly
+                silent: True
+                name: carl_cigre_ts # scenario name
+                config: src/classic-arl.yml # relative to current working directory; the file that is called .config/midas/ClasicARL.yml on my laptop
+                end: 24*60*60* 15
+                step_size: 60 # &step_size put here from above with value 1
+                start_date: random # Use ISO datestring or magic keywork 'random'
+                mosaik_params: {addr: [127.0.0.1, 0]} # You can change the port (5678) to something else (e.g. 5679) when 'address already in use'
+                store_params: #everything in here overwrites what is written in classic-arl.yml in /midas-scenarios/
+                  buffer_size: 1000 # Every x steps, intermediate results are dumped to the midas store
+                  filename: carl_with_arl_ts.hdf5
+                  keep_old_files: true
+                
+          reward:
+            name:  midas.tools.palaestrai.rewards:ExtendedGridHealthReward
+            params: {}
+      agents:
+        - name: gandalf
+          brain:
+            name: harl:SACBrain
+            params:
+              batch_size: 1024
+              fc_dims: [8, 8]
+              gamma: 0.98
+              lr: 0.0003
+              replay_size: 3000000
+              update_after: 1000
+              update_every: 10
+          muscle:
+            name: harl:SACMuscle
+            params: {start_steps: 100}
+
+          objective:
+            name: midas.tools.palaestrai:ArlDefenderObjective
+            params: {}
+          sensors: &all_sensors
+            - midas_powergrid.Powergrid-0.0-bus-1.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-1.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-10.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-10.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-11.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-11.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-12.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-12.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-13.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-13.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-14.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-14.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-2.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-2.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-3.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-3.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-4.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-4.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-5.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-5.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-6.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-6.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-7.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-7.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-8.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-8.va_degree
+            - midas_powergrid.Powergrid-0.0-bus-9.vm_pu
+            - midas_powergrid.Powergrid-0.0-bus-9.va_degree
+            - midas_powergrid.Powergrid-0.0-line-0.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-0.in_service
+            - midas_powergrid.Powergrid-0.0-line-1.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-1.in_service
+            - midas_powergrid.Powergrid-0.0-line-10.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-10.in_service
+            - midas_powergrid.Powergrid-0.0-line-11.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-11.in_service
+            - midas_powergrid.Powergrid-0.0-line-12.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-12.in_service
+            - midas_powergrid.Powergrid-0.0-line-13.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-13.in_service
+            - midas_powergrid.Powergrid-0.0-line-14.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-14.in_service
+            - midas_powergrid.Powergrid-0.0-line-2.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-2.in_service
+            - midas_powergrid.Powergrid-0.0-line-3.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-3.in_service
+            - midas_powergrid.Powergrid-0.0-line-4.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-4.in_service
+            - midas_powergrid.Powergrid-0.0-line-5.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-5.in_service
+            - midas_powergrid.Powergrid-0.0-line-6.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-6.in_service
+            - midas_powergrid.Powergrid-0.0-line-7.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-7.in_service
+            - midas_powergrid.Powergrid-0.0-line-8.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-8.in_service
+            - midas_powergrid.Powergrid-0.0-line-9.loading_percent
+            - midas_powergrid.Powergrid-0.0-line-9.in_service
+          actuators: [midas_powergrid.Powergrid-0.0-load-0-1.p_mw, midas_powergrid.Powergrid-0.0-load-0-1.q_mvar,
+            midas_powergrid.Powergrid-0.0-load-1-3.p_mw, midas_powergrid.Powergrid-0.0-load-1-3.q_mvar,
+            midas_powergrid.Powergrid-0.0-load-10-12.p_mw, midas_powergrid.Powergrid-0.0-load-10-12.q_mvar,
+            midas_powergrid.Powergrid-0.0-load-11-13.p_mw, midas_powergrid.Powergrid-0.0-load-11-13.q_mvar,
+            midas_powergrid.Powergrid-0.0-load-12-14.p_mw, midas_powergrid.Powergrid-0.0-load-12-14.q_mvar,
+            midas_powergrid.Powergrid-0.0-load-2-4.p_mw, midas_powergrid.Powergrid-0.0-load-2-4.q_mvar,
+            midas_powergrid.Powergrid-0.0-load-3-5.p_mw, midas_powergrid.Powergrid-0.0-load-3-5.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-0-1.p_mw, midas_powergrid.Powergrid-0.0-sgen-0-1.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-1-3.p_mw, midas_powergrid.Powergrid-0.0-sgen-1-3.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-10-12.p_mw, midas_powergrid.Powergrid-0.0-sgen-10-12.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-11-13.p_mw, midas_powergrid.Powergrid-0.0-sgen-11-13.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-12-14.p_mw, midas_powergrid.Powergrid-0.0-sgen-12-14.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-2-4.p_mw, midas_powergrid.Powergrid-0.0-sgen-2-4.q_mvar,
+            midas_powergrid.Powergrid-0.0-sgen-3-5.p_mw, midas_powergrid.Powergrid-0.0-sgen-3-5.q_mvar]
+
+        - name: sauron
+          brain: 
+            name: harl:SACBrain
+            params: 
+              batch_size: 1024
+              fc_dims: [8, 8]
+              gamma: 0.98
+              lr: 0.0003
+              replay_size: 1000000
+              update_after: 1000
+              update_every: 10
+          muscle: 
+            name: harl:SACMuscle
+            params: {start_steps: 100}
+          objective:
+            name: midas.tools.palaestrai:ArlAttackerObjective
+            params: {}
+          sensors: *all_sensors
+          actuators:
+            - midas_powergrid.Powergrid-0.0-load-4-6.p_mw
+            - midas_powergrid.Powergrid-0.0-load-4-6.q_mvar
+            - midas_powergrid.Powergrid-0.0-load-5-7.p_mw
+            - midas_powergrid.Powergrid-0.0-load-5-7.q_mvar
+            - midas_powergrid.Powergrid-0.0-load-6-8.p_mw
+            - midas_powergrid.Powergrid-0.0-load-6-8.q_mvar
+            - midas_powergrid.Powergrid-0.0-load-7-9.p_mw
+            - midas_powergrid.Powergrid-0.0-load-7-9.q_mvar
+            - midas_powergrid.Powergrid-0.0-load-8-10.p_mw
+            - midas_powergrid.Powergrid-0.0-load-8-10.q_mvar
+            - midas_powergrid.Powergrid-0.0-load-9-11.p_mw
+            - midas_powergrid.Powergrid-0.0-load-9-11.q_mvar
+            - midas_powergrid.Powergrid-0.0-sgen-4-6.p_mw
+            - midas_powergrid.Powergrid-0.0-sgen-4-6.q_mvar
+            - midas_powergrid.Powergrid-0.0-sgen-5-7.p_mw
+            - midas_powergrid.Powergrid-0.0-sgen-5-7.q_mvar
+            - midas_powergrid.Powergrid-0.0-sgen-6-8.p_mw
+            - midas_powergrid.Powergrid-0.0-sgen-6-8.q_mvar
+            - midas_powergrid.Powergrid-0.0-sgen-7-9.p_mw
+            - midas_powergrid.Powergrid-0.0-sgen-7-9.q_mvar
+            - midas_powergrid.Powergrid-0.0-sgen-8-10.p_mw
+            - midas_powergrid.Powergrid-0.0-sgen-8-10.q_mvar
+            - midas_powergrid.Powergrid-0.0-sgen-9-11.p_mw
+            - midas_powergrid.Powergrid-0.0-sgen-9-11.q_mvar
+      simulation:
+        name: palaestrai.simulation:TakingTurns
+        conditions:
+          - name: palaestrai.simulation:VanillaSimControllerTerminationCondition 
+            params: {}
+      phase_config:
+        mode: train
+        worker: 1
+        episodes: 12
+  - test:
+      phase_config:
+        mode: test
+        worker: 1
+        episodes: 15
+run_config: 
+  condition:
+    name: palaestrai.experiment:VanillaRunGovernorTerminationCondition
+    params: {}
+
+
+######################################################################
+# Some additional information:                                       #
+# A list of all sensor and actuator uids of midasmv_der              #
+# Just place them in the correct list of the agents and they will    #
+# work.                                                              #
+######################################################################
+
+# Actuators
+
+# midas_powergrid.Powergrid-0.0-load-0-1.p_mw
+# midas_powergrid.Powergrid-0.0-load-0-1.q_mvar
+# midas_powergrid.Powergrid-0.0-load-1-3.p_mw
+# midas_powergrid.Powergrid-0.0-load-1-3.q_mvar
+# midas_powergrid.Powergrid-0.0-load-10-12.p_mw
+# midas_powergrid.Powergrid-0.0-load-10-12.q_mvar
+# midas_powergrid.Powergrid-0.0-load-11-13.p_mw
+# midas_powergrid.Powergrid-0.0-load-11-13.q_mvar
+# midas_powergrid.Powergrid-0.0-load-12-14.p_mw
+# midas_powergrid.Powergrid-0.0-load-12-14.q_mvar
+# midas_powergrid.Powergrid-0.0-load-2-4.p_mw
+# midas_powergrid.Powergrid-0.0-load-2-4.q_mvar
+# midas_powergrid.Powergrid-0.0-load-3-5.p_mw
+# midas_powergrid.Powergrid-0.0-load-3-5.q_mvar
+# midas_powergrid.Powergrid-0.0-load-4-6.p_mw
+# midas_powergrid.Powergrid-0.0-load-4-6.q_mvar
+# midas_powergrid.Powergrid-0.0-load-5-7.p_mw
+# midas_powergrid.Powergrid-0.0-load-5-7.q_mvar
+# midas_powergrid.Powergrid-0.0-load-6-8.p_mw
+# midas_powergrid.Powergrid-0.0-load-6-8.q_mvar
+# midas_powergrid.Powergrid-0.0-load-7-9.p_mw
+# midas_powergrid.Powergrid-0.0-load-7-9.q_mvar
+# midas_powergrid.Powergrid-0.0-load-8-10.p_mw
+# midas_powergrid.Powergrid-0.0-load-8-10.q_mvar
+# midas_powergrid.Powergrid-0.0-load-9-11.p_mw
+# midas_powergrid.Powergrid-0.0-load-9-11.q_mvar
+
+# midas_powergrid.Powergrid-0.0-sgen-0-1.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-0-1.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-1-3.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-1-3.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-10-12.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-10-12.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-11-13.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-11-13.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-12-14.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-12-14.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-2-4.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-2-4.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-3-5.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-3-5.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-4-6.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-4-6.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-5-7.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-5-7.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-6-8.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-6-8.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-7-9.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-7-9.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-8-10.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-8-10.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-9-11.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-9-11.q_mvar
+# midas_powergrid.Powergrid-0.0-trafo-0.tap_pos
+# midas_powergrid.Powergrid-0.0-trafo-1.tap_pos
+
+# Sensors
+# midas_powergrid.Powergrid-0.0-bus-1.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-1.va_degree
+# midas_powergrid.Powergrid-0.0-bus-10.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-10.va_degree
+# midas_powergrid.Powergrid-0.0-bus-11.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-11.va_degree
+# midas_powergrid.Powergrid-0.0-bus-12.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-12.va_degree
+# midas_powergrid.Powergrid-0.0-bus-13.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-13.va_degree
+# midas_powergrid.Powergrid-0.0-bus-14.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-14.va_degree
+# midas_powergrid.Powergrid-0.0-bus-2.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-2.va_degree
+# midas_powergrid.Powergrid-0.0-bus-3.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-3.va_degree
+# midas_powergrid.Powergrid-0.0-bus-4.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-4.va_degree
+# midas_powergrid.Powergrid-0.0-bus-5.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-5.va_degree
+# midas_powergrid.Powergrid-0.0-bus-6.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-6.va_degree
+# midas_powergrid.Powergrid-0.0-bus-7.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-7.va_degree
+# midas_powergrid.Powergrid-0.0-bus-8.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-8.va_degree
+# midas_powergrid.Powergrid-0.0-bus-9.vm_pu
+# midas_powergrid.Powergrid-0.0-bus-9.va_degree
+# midas_powergrid.Powergrid-0.0-line-0.loading_percent
+# midas_powergrid.Powergrid-0.0-line-0.in_service
+# midas_powergrid.Powergrid-0.0-line-1.loading_percent
+# midas_powergrid.Powergrid-0.0-line-1.in_service
+# midas_powergrid.Powergrid-0.0-line-10.loading_percent
+# midas_powergrid.Powergrid-0.0-line-10.in_service
+# midas_powergrid.Powergrid-0.0-line-11.loading_percent
+# midas_powergrid.Powergrid-0.0-line-11.in_service
+# midas_powergrid.Powergrid-0.0-line-12.loading_percent
+# midas_powergrid.Powergrid-0.0-line-12.in_service
+# midas_powergrid.Powergrid-0.0-line-13.loading_percent
+# midas_powergrid.Powergrid-0.0-line-13.in_service
+# midas_powergrid.Powergrid-0.0-line-14.loading_percent
+# midas_powergrid.Powergrid-0.0-line-14.in_service
+# midas_powergrid.Powergrid-0.0-line-2.loading_percent
+# midas_powergrid.Powergrid-0.0-line-2.in_service
+# midas_powergrid.Powergrid-0.0-line-3.loading_percent
+# midas_powergrid.Powergrid-0.0-line-3.in_service
+# midas_powergrid.Powergrid-0.0-line-4.loading_percent
+# midas_powergrid.Powergrid-0.0-line-4.in_service
+# midas_powergrid.Powergrid-0.0-line-5.loading_percent
+# midas_powergrid.Powergrid-0.0-line-5.in_service
+# midas_powergrid.Powergrid-0.0-line-6.loading_percent
+# midas_powergrid.Powergrid-0.0-line-6.in_service
+# midas_powergrid.Powergrid-0.0-line-7.loading_percent
+# midas_powergrid.Powergrid-0.0-line-7.in_service
+# midas_powergrid.Powergrid-0.0-line-8.loading_percent
+# midas_powergrid.Powergrid-0.0-line-8.in_service
+# midas_powergrid.Powergrid-0.0-line-9.loading_percent
+# midas_powergrid.Powergrid-0.0-line-9.in_service
+# midas_powergrid.Powergrid-0.0-load-0-1.p_mw
+# midas_powergrid.Powergrid-0.0-load-0-1.q_mvar
+# midas_powergrid.Powergrid-0.0-load-0-1.in_service
+# midas_powergrid.Powergrid-0.0-load-1-3.p_mw
+# midas_powergrid.Powergrid-0.0-load-1-3.q_mvar
+# midas_powergrid.Powergrid-0.0-load-1-3.in_service
+# midas_powergrid.Powergrid-0.0-load-10-13.p_mw
+# midas_powergrid.Powergrid-0.0-load-10-13.q_mvar
+# midas_powergrid.Powergrid-0.0-load-10-13.in_service
+# midas_powergrid.Powergrid-0.0-load-11-14.p_mw
+# midas_powergrid.Powergrid-0.0-load-11-14.q_mvar
+# midas_powergrid.Powergrid-0.0-load-11-14.in_service
+# midas_powergrid.Powergrid-0.0-load-2-4.p_mw
+# midas_powergrid.Powergrid-0.0-load-2-4.q_mvar
+# midas_powergrid.Powergrid-0.0-load-2-4.in_service
+# midas_powergrid.Powergrid-0.0-load-3-5.p_mw
+# midas_powergrid.Powergrid-0.0-load-3-5.q_mvar
+# midas_powergrid.Powergrid-0.0-load-3-5.in_service
+# midas_powergrid.Powergrid-0.0-load-4-6.p_mw
+# midas_powergrid.Powergrid-0.0-load-4-6.q_mvar
+# midas_powergrid.Powergrid-0.0-load-4-6.in_service
+# midas_powergrid.Powergrid-0.0-load-5-7.p_mw
+# midas_powergrid.Powergrid-0.0-load-5-7.q_mvar
+# midas_powergrid.Powergrid-0.0-load-5-7.in_service
+# midas_powergrid.Powergrid-0.0-load-6-8.p_mw
+# midas_powergrid.Powergrid-0.0-load-6-8.q_mvar
+# midas_powergrid.Powergrid-0.0-load-6-8.in_service
+# midas_powergrid.Powergrid-0.0-load-7-9.p_mw
+# midas_powergrid.Powergrid-0.0-load-7-9.q_mvar
+# midas_powergrid.Powergrid-0.0-load-7-9.in_service
+# midas_powergrid.Powergrid-0.0-load-8-10.p_mw
+# midas_powergrid.Powergrid-0.0-load-8-10.q_mvar
+# midas_powergrid.Powergrid-0.0-load-8-10.in_service
+# midas_powergrid.Powergrid-0.0-load-9-11.p_mw
+# midas_powergrid.Powergrid-0.0-load-9-11.q_mvar
+# midas_powergrid.Powergrid-0.0-load-9-11.in_service
+# midas_powergrid.Powergrid-0.0-sgen-0-1.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-0-1.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-0-1.in_service
+# midas_powergrid.Powergrid-0.0-sgen-1-3.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-1-3.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-1-3.in_service
+# midas_powergrid.Powergrid-0.0-sgen-10-13.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-10-13.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-10-13.in_service
+# midas_powergrid.Powergrid-0.0-sgen-11-14.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-11-14.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-11-14.in_service
+# midas_powergrid.Powergrid-0.0-sgen-2-4.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-2-4.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-2-4.in_service
+# midas_powergrid.Powergrid-0.0-sgen-3-5.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-3-5.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-3-5.in_service
+# midas_powergrid.Powergrid-0.0-sgen-4-6.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-4-6.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-4-6.in_service
+# midas_powergrid.Powergrid-0.0-sgen-5-7.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-5-7.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-5-7.in_service
+# midas_powergrid.Powergrid-0.0-sgen-6-8.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-6-8.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-6-8.in_service
+# midas_powergrid.Powergrid-0.0-sgen-7-9.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-7-9.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-7-9.in_service
+# midas_powergrid.Powergrid-0.0-sgen-8-10.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-8-10.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-8-10.in_service
+# midas_powergrid.Powergrid-0.0-sgen-9-11.p_mw
+# midas_powergrid.Powergrid-0.0-sgen-9-11.q_mvar
+# midas_powergrid.Powergrid-0.0-sgen-9-11.in_service
+# midas_powergrid.Powergrid-0.0-trafo-0.loading_percent
+# midas_powergrid.Powergrid-0.0-trafo-1.loading_percent

@@ -1,0 +1,19 @@
+numba==0.56.4
+midas-palaestrai~=3.5.1
+
+midas-mosaik~=1.1.0
+-e git+https://gitlab.com/arl2/palaestrai.git@556-parallel-execution-of-multiple-environments-with-multiple-muscles#egg=palaestrai
+-e git+https://gitlab.com/arl2/harl.git@30-prepare-sac-implementation-for-multi-worker-support#egg=palaestrai-agents
+#palaestrai~=3.5.0
+#palaestrai-agents~=3.5.0
+palaestrai-arsenai~=3.5.0
+#palaestrai-mosaik~=3.5.0
+git+https://gitlab.com/arl2/palaestrai-mosaik.git@parallel_execution
+midas-powergrid~=1.0.13
+ez_yaml
+#pandas
+pymoo
+#-e git+https://gitlab.com/arl-experiments/psi-objectives.git@carl-paper
+torch
+torchvision
+torchaudio

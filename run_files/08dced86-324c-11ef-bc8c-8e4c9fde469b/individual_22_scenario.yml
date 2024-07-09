@@ -1,0 +1,211 @@
+carl_cigre_base:
+  end: 1*10
+  modules: [store, powergrid]
+  parent: null
+  powergrid_params:
+    midasmv:
+      constraints:
+      - [bus, 0.1]
+      - [load, 0.02]
+      - [sgen, 0.05]
+      - [line, 100]
+      grid_params: {constant_load_p_mw: 0.7, constant_load_q_mvar: 0.23, constant_sgen_p_mw: 0.4,
+        constant_sgen_q_mvar: -0.13, double_actuator_values: true}
+      gridfile: midasmv
+      plotting: false
+      use_constraints: true
+  start_date: 2020-06-01 00:00:00+0100
+  step_size: 1
+  store_params: {filename: carl_cigre_base.hdf5}
+  with_arl: true
+carl_cigre_qmarket:
+  custom_modules:
+  - [qmarket_agents, midas.modules.qmarket_agents.module:MarketAgentsModule]
+  - [qmarket, midas.modules.qmarket.module:QMarketModule]
+  der_params:
+    midasmv:
+      mapping:
+        3:
+        - [PV, 0.7]
+        4:
+        - [CHP, 0.4]
+        - [CHP, 0.4]
+        5:
+        - [Diesel, 0.8]
+        6:
+        - [Biogas, 1.25]
+        7:
+        - [PV, 0.8]
+        8:
+        - [CHP, 0.4]
+        - [PV, 0.8]
+        9:
+        - [PV, 0.46]
+        - [BAT, 0.8]
+        11:
+        - [PV, 0.6]
+        - [HVAC, 0.343]
+        13:
+        - [PV, 0.6]
+        - [Diesel, 1.0]
+        14:
+        - [PV, 0.4]
+        - [HVAC, 1.279]
+      provide_forecasts: true
+      unit: mw
+      use_decimal_percent: true
+      weather_forecast_mapping:
+        BAT: [bremen, 0]
+        Biogas: [bremen, 0]
+        CHP: [bremen, 0]
+        Diesel: [bremen, 0]
+        HVAC: [bremen, 0]
+        PV: [bremen, 0]
+      weather_provider_mapping:
+        BAT: [bremen, 0]
+        Biogas: [bremen, 0]
+        CHP: [bremen, 0]
+        Diesel: [bremen, 0]
+        HVAC: [bremen, 0]
+        PV: [bremen, 0]
+  end: 30*24*60*60
+  forecast_horizon_hours: 0.25
+  goa_params:
+    midasmv: {der_sgen_sensor: true, grid_busload_sensor: false, grid_busvm_sensor: true,
+      grid_load_sensor: true, grid_sgen_sensor: false, gridfile: midasmv, overvoltage: 1.1,
+      undervoltage: 0.9}
+  marketagents_params:
+    midasmv:
+      mapping:
+      - [PV, 3, 0]
+      - [PV, 7, 0]
+      - [PV, 8, 0]
+      - [PV, 9, 0]
+      - [PV, 11, 0]
+      - [PV, 13, 0]
+      - [PV, 14, 0]
+  modules: [goa]
+  parent: carl_cigre_ts
+  qmarket_params:
+    midasmv: {u_max: 1.04, u_min: 0.96}
+  start_date: 2020-06-08 00:00:00+0100
+  step_size: 15*60
+  store_params: {buffer_size: 250, filename: carl_cigre_qmarket.hdf5}
+  weather_params:
+    bremen:
+      weather_mapping:
+        WeatherCurrent:
+        - {interpolate: true}
+        WeatherForecast:
+        - {forecast_error: 0.15, interpolate: true}
+carl_cigre_ts:
+  comdata_params:
+    midasmv:
+      interpolate: true
+      mapping:
+        13:
+        - [SuperMarket, 3.0]
+        14:
+        - [SmallHotel, 2.0]
+      randomize_cos_phi: false
+      randomize_data: true
+  der_params:
+    midasmv:
+      mapping:
+        3:
+        - [PV, 9.115847111121942]
+        - [HVAC, 1.279]
+        - [HVAC, 0.343]
+        4:
+        - [HVAC, 0.343]
+        7:
+        - [DIESEL, 3.054031020445918]
+        8:
+        - [PV, 1.8847178042854456]
+        9:
+        - [HVAC, 0.23]
+        - [BAT, 0.22353295227638653]
+        11:
+        - [Biogas, 2.05]
+        - [BAT, 0.36468764988876556]
+        - [PV, 9.431755563988172]
+        13:
+        - [HVAC, 0.23]
+        - [PV, 9.969873222747593]
+        14:
+        - [PV, 9.600902287495602]
+        - [HVAC, 1.279]
+      weather_provider_mapping:
+        BAT: [bremen, 0]
+        Biogas: [bremen, 0]
+        CHP: [bremen, 0]
+        DIESEL: [bremen, 0]
+        HVAC: [bremen, 0]
+        PV: [bremen, 0]
+  end: 365*24*60*60
+  modules: [sndata, comdata, weather, der]
+  parent: carl_cigre_base
+  powergrid_params:
+    midasmv:
+      grid_params: {constant_load_p_mw: 0, constant_load_q_mvar: 0, constant_sgen_p_mw: 0,
+        constant_sgen_q_mvar: 0}
+  sndata_params:
+    midasmv:
+      land_mapping:
+        1:
+        - [0, 1.0]
+        - [2, 1.0]
+        - [3, 2.0]
+        - [6, 2.0]
+        - [7, 1.0]
+        3:
+        - [2, 1.0]
+        - [3, 1.0]
+        - [6, 1.0]
+        - [7, 1.0]
+        4:
+        - [0, 2.0]
+        - [3, 2.0]
+        - [7, 1.0]
+        5:
+        - [3, 2.0]
+        - [7, 1.0]
+        6:
+        - [0, 2.0]
+        - [3, 1.0]
+        7:
+        - [0, 2.0]
+        - [2, 1.0]
+        - [3, 2.0]
+        - [7, 1.0]
+        8:
+        - [0, 1.0]
+        - [3, 1.0]
+        - [6, 1.0]
+        9:
+        - [2, 1.0]
+        - [3, 1.0]
+        - [6, 2.0]
+        - [7, 1.0]
+        10:
+        - [0, 2.0]
+        - [2, 1.0]
+        - [3, 1.0]
+        - [6, 2.0]
+        - [7, 1.0]
+        11:
+        - [0, 1.0]
+        - [2, 1.0]
+        - [3, 1.0]
+        - [6, 2.0]
+        - [7, 1.0]
+      randomize_cos_phi: true
+      randomize_data: true
+  start_date: 2020-01-01 00:00:00+0100
+  step_size: 5*60
+  store_params: {buffer_size: 1000, filename: carl_cigre_ts.hdf5}
+  weather_params:
+    bremen:
+      weather_mapping:
+        WeatherCurrent:
+        - {interpolate: true, randomize: true}
